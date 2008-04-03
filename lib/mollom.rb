@@ -133,6 +133,7 @@ class Mollom
         end
       end
     end
+    raise Mollom::NoAvailableServers
   end
 
   # Gets a list of servers from Mollom
@@ -202,4 +203,5 @@ class Mollom
   end
   
   class Error < StandardError; end
+  class NoAvailableServers < Error; end
 end
