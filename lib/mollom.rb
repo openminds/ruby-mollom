@@ -2,6 +2,9 @@ require 'xmlrpc/client'
 require 'openssl'
 require 'base64'
 
+# Mollom API requires this to change, but this gives a warning!
+# XMLRPC::Client::USER_AGENT = "Ruby Mollom/0.1"
+
 class Mollom
   API_VERSION = '1.0'
   module Errors
@@ -116,7 +119,7 @@ class Mollom
   def send_command(command, data = {})
     server_list.each do |server|
       begin
-        return XMLRPC::Client.new(server, "/#{API_VERSION}").call(command, data.merge(authentication_hash))
+        return XMLRPC::Client.new(server[:ip], "/#{API_VERSION}").call(command, data.merge(authentication_hash))
       rescue XMLRPC::FaultException => error
         case error.faultCode
         when Errors::Standard
@@ -135,7 +138,10 @@ class Mollom
   # Gets a list of servers from Mollom
   def server_list
     # Mollom prepends 'http://' to the IP.. Ruby doesn't like that
-    @server_list ||= XMLRPC::Client.new("xmlrpc.mollom.com", "/#{API_VERSION}").call('mollom.getServerList', authentication_hash).collect { |s| s.sub('http://', '') }
+    @server_list ||= XMLRPC::Client.new("xmlrpc.mollom.com", "/#{API_VERSION}").call('mollom.getServerList', authentication_hash).collect do |server| 
+      proto, ip = server.split('://')
+      {:proto => proto, :ip => ip}
+    end
   end
 
   # Creates a HMAC-SHA1 Hash with the current timestamp, and your private key.
@@ -143,8 +149,8 @@ class Mollom
     now = Time.now.gmtime.strftime('%Y-%m-%dT%H:%M:%S.000+0000')
 
     hash = Base64.encode64(
-    OpenSSL::HMAC.digest(OpenSSL::Digest::SHA1.new, @private_key, now)
-    )
+      OpenSSL::HMAC.digest(OpenSSL::Digest::SHA1.new, @private_key, now)
+    ).chomp
 
     return :public_key=> @public_key, :time => now, :hash => hash
   end
