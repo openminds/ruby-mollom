@@ -71,6 +71,11 @@ class TestMollom < Test::Unit::TestCase
     @mollom.send_command('mollom.testMessage', {:options => 'foo'})
   end
   
+  def test_send_command_with_reload_exception
+    # TODO: Test this
+    # @mollom.send_command('mollom.testMessage', {:options => 'foo'})
+  end
+  
   def test_send_command_with_bad_command
     Mollom.any_instance.stubs(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}])
     xml_rpc = mock
