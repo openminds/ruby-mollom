@@ -120,26 +120,31 @@ class Mollom
     server_list.each do |server|
       begin
         return XMLRPC::Client.new(server[:ip], "/#{API_VERSION}").call(command, data.merge(authentication_hash))
+      # TODO: Rescue more stuff (Connection Timeout and such)
       rescue XMLRPC::FaultException => error
         case error.faultCode
         when Errors::Standard
           raise Error.new(error.faultString)
         when Errors::Refresh
-          # TO IMPLEMENT
+          # we take this one out of our loop
+          raise
         when Errors::Redirect
           next
         else
-          raise
+          next
         end
       end
     end
     raise Mollom::NoAvailableServers
+  rescue XMLRPC::FaultException
+    # We know it is Errors::Refresh
+    server_list(true)
+    retry
   end
 
   # Gets a list of servers from Mollom
   def server_list refresh = false
     @server_list = nil if refresh
-    # Mollom prepends 'http://' to the IP.. Ruby doesn't like that
     @server_list ||= XMLRPC::Client.new("xmlrpc.mollom.com", "/#{API_VERSION}").call('mollom.getServerList', authentication_hash).collect do |server| 
       proto, ip = server.split('://')
       {:proto => proto, :ip => ip}
