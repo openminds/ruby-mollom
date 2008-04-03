@@ -1,23 +1,33 @@
 == Mollom
 
-This is a Ruby class for easy interfacing with the mollom.com open API for spam detection and content quality assesment.
+This is a Ruby class for easy interfacing with the mollom.com open API for spam detection and content quality assessment.
+
+== Installation
+
+You can either install the library as a gem
+  gem install mollom
+
+Or you can get the latest development version from GitHub:
+  git clone git://github.com/DefV/ruby-mollom.git
 
 == Usage
 
-After you have requested a public/private keypair from Mollom (on http://www.mollom.com), you can start using this class.
+After you have requested a public/private key-pair from Mollom (on http://www.mollom.com), you can start using this class.
 
-  require 'lib/mollom'
+  require 'rubygems'
+  require 'mollom'
   
-  m = Mollom.new(:private_key => 'azkaozdkoakdzkodazdz', :public_key => '34342ikdiozeezioez')
+  m = Mollom.new(:private_key => 'your-private-key', :public_key => 'your-public-key')
 
   content = m.check_content(:post_title => 'Mollem is an open API', 
-							:post_body => "Mollem is an open API for spam detection and content quality assessment.",
+							:post_body => "Lorem Ipsum dolor...",
 							:author_name => 'Jan De Poorter',
 							:author_url => 'http://blog.defv.be')
   if content.unsure? or content.spam?
-    puts "Captcha: " + m.image_captcha(:session_id => content.session_id)["url"]
-    print "Captcha is: "
-    puts m.check_captcha(:session_id => content.session_id, :solution => STDIN.gets.chomp)
+    # possible spam, show CAPTCHA
+    puts "CAPTCHA: " + m.image_captcha(:session_id => content.session_id)["url"]
+    
+    captcha_correct = m.check_captcha(:session_id => content.session_id, :solution => STDIN.gets.chomp)
   else
     puts "The post is perfect! No spam!"
   end
