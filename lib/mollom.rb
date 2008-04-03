@@ -137,7 +137,8 @@ class Mollom
   end
 
   # Gets a list of servers from Mollom
-  def server_list
+  def server_list refresh = false
+    @server_list = nil if refresh
     # Mollom prepends 'http://' to the IP.. Ruby doesn't like that
     @server_list ||= XMLRPC::Client.new("xmlrpc.mollom.com", "/#{API_VERSION}").call('mollom.getServerList', authentication_hash).collect do |server| 
       proto, ip = server.split('://')

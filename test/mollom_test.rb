@@ -39,6 +39,16 @@ class TestMollom < Test::Unit::TestCase
     assert_equal [{:ip => '172.16.0.1', :proto => 'http'}, {:ip => '172.16.0.2', :proto => 'http'}, {:ip => '172.16.0.2', :proto => 'https'}], @mollom.server_list
   end
   
+  def test_server_list_force_reload
+    xml_rpc = mock
+    xml_rpc.expects(:call).times(2).with('mollom.getServerList', is_a(Hash)).returns(['http://172.16.0.1', 'http://172.16.0.2', 'https://172.16.0.2'])
+    XMLRPC::Client.stubs(:new).with('xmlrpc.mollom.com', '/1.0').returns(xml_rpc)
+    
+    @mollom.server_list
+    @mollom.server_list
+    @mollom.server_list(true)
+  end
+  
   def test_send_command_with_good_server
     Mollom.any_instance.stubs(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}])
     xml_rpc = mock
