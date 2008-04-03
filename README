@@ -23,8 +23,10 @@ After you have requested a public/private key-pair from Mollom (on http://www.mo
 							:post_body => "Lorem Ipsum dolor...",
 							:author_name => 'Jan De Poorter',
 							:author_url => 'http://blog.defv.be')
-  if content.unsure? or content.spam?
-    # possible spam, show CAPTCHA
+  if content.spam?
+	puts "You, sir, are a spammer.. Goodbye!"
+  elsif content.unsure?
+    # possible spam, possible ham, show CAPTCHA
     puts "CAPTCHA: " + m.image_captcha(:session_id => content.session_id)["url"]
     
     captcha_correct = m.check_captcha(:session_id => content.session_id, :solution => STDIN.gets.chomp)
