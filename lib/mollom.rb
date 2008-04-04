@@ -14,6 +14,7 @@ class Mollom
   end
 
   attr_accessor :private_key, :public_key
+  attr_writer :server_list
 
   # Creates a new Mollom object. Takes +private_key+ and +public_key+ as keys.
   # 
@@ -110,9 +111,23 @@ class Mollom
   #  low-quality
   #  unwanted
   #
-  #  mollow.send_feedback :session_id => 'a9616e6b4cd6a81ecdd509fa624d895d', :feedback => 'unwanted'
+  #  mollom.send_feedback :session_id => 'a9616e6b4cd6a81ecdd509fa624d895d', :feedback => 'unwanted'
   def send_feedback feedback = {}
     return send_command('mollom.sendFeedback', feedback)
+  end
+
+  # Gets a list of servers from Mollom. You should cache this information in your application in a temporary file or in a database. You can set this with Mollom#server_list=
+  # 
+  # Takes an optional parameter +refresh+, which resets the cached value.
+  #
+  #  mollom.server_list
+  #  # => [{:proto=>"http", :ip=>"88.151.243.81"}, {:proto=>"http", :ip=>"82.103.131.136"}]
+  def server_list refresh = false
+    @server_list = nil if refresh
+    @server_list ||= XMLRPC::Client.new("xmlrpc.mollom.com", "/#{API_VERSION}").call('mollom.getServerList', authentication_hash).collect do |server| 
+      proto, ip = server.split('://')
+      {:proto => proto, :ip => ip}
+    end
   end
 
   private
@@ -141,16 +156,7 @@ class Mollom
     server_list(true)
     retry
   end
-
-  # Gets a list of servers from Mollom
-  def server_list refresh = false
-    @server_list = nil if refresh
-    @server_list ||= XMLRPC::Client.new("xmlrpc.mollom.com", "/#{API_VERSION}").call('mollom.getServerList', authentication_hash).collect do |server| 
-      proto, ip = server.split('://')
-      {:proto => proto, :ip => ip}
-    end
-  end
-
+  
   # Creates a HMAC-SHA1 Hash with the current timestamp, and your private key.
   def authentication_hash
     now = Time.now.gmtime.strftime('%Y-%m-%dT%H:%M:%S.000+0000')
