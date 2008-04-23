@@ -22,7 +22,7 @@ After you have requested a public/private key-pair from Mollom (on http://www.mo
   content = m.check_content(:post_title => 'Mollem is an open API', 
 							:post_body => "Lorem Ipsum dolor...",
 							:author_name => 'Jan De Poorter',
-							:author_url => 'http://blog.defv.be')
+							:author_url => 'http://workswithruby.com')
   if content.spam?
 	puts "You, sir, are a spammer.. Goodbye!"
   elsif content.unsure?
