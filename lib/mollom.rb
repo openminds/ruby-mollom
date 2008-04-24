@@ -157,7 +157,7 @@ class Mollom
     retry
   end
   
-  # Creates a HMAC-SHA1 Hash with the current timestamp, and your private key.
+  # Creates a HMAC-SHA1 Hash with the current timestamp, a nonce, and your private key.
   def authentication_hash
     now = Time.now.gmtime.strftime('%Y-%m-%dT%H:%M:%S.000+0000')
     nonce = Kernel.rand(2**31) # Random signed int
