@@ -25,10 +25,12 @@ class TestMollom < Test::Unit::TestCase
     time = mock
     time.expects(:strftime).with('%Y-%m-%dT%H:%M:%S.000+0000').returns('2008-04-01T13:54:26.000+0000')
     Time.stubs(:now).returns(stub(:gmtime => time))
+    Kernel.expects(:rand).with(2**31).returns(42)
     hash = @mollom.authentication_hash
-    assert_equal("24qAgAC1v1U+5NbKyrQSp/XKWAI=", hash[:hash])
+    assert_equal("oWN15TqrbLVdTAgcuDmofskaNyM=", hash[:hash])
     assert_equal('yyyyyyyyy', hash[:public_key])
     assert_equal('2008-04-01T13:54:26.000+0000', hash[:time])
+    assert_equal(42, hash[:nonce])
   end
   
   def test_server_list
