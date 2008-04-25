@@ -24,7 +24,7 @@ class TestMollom < Test::Unit::TestCase
   def test_authentication_hash
     time = mock
     time.expects(:strftime).with('%Y-%m-%dT%H:%M:%S.000+0000').returns('2008-04-01T13:54:26.000+0000')
-    Time.stubs(:now).returns(stub(:gmtime => time))
+    Time.expects(:now).returns(stub(:gmtime => time))
     Kernel.expects(:rand).with(2**31).returns(42)
     hash = @mollom.authentication_hash
     assert_equal("oWN15TqrbLVdTAgcuDmofskaNyM=", hash[:hash])
@@ -36,7 +36,7 @@ class TestMollom < Test::Unit::TestCase
   def test_server_list
     xml_rpc = mock
     xml_rpc.expects(:call).with('mollom.getServerList', is_a(Hash)).returns(['http://172.16.0.1', 'http://172.16.0.2', 'https://172.16.0.2'])
-    XMLRPC::Client.stubs(:new).with('xmlrpc.mollom.com', '/1.0').returns(xml_rpc)
+    XMLRPC::Client.expects(:new).with('xmlrpc.mollom.com', '/1.0').returns(xml_rpc)
     
     assert_equal [{:ip => '172.16.0.1', :proto => 'http'}, {:ip => '172.16.0.2', :proto => 'http'}, {:ip => '172.16.0.2', :proto => 'https'}], @mollom.server_list
   end
@@ -52,47 +52,54 @@ class TestMollom < Test::Unit::TestCase
   end
   
   def test_send_command_with_good_server
-    Mollom.any_instance.stubs(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}])
+    Mollom.any_instance.expects(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}])
     xml_rpc = mock
     xml_rpc.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo'))
-    XMLRPC::Client.stubs(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
+    XMLRPC::Client.expects(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
     
     @mollom.send_command('mollom.testMessage', {:options => 'foo'})
   end
   
   
   def test_send_command_with_bad_server
-    Mollom.any_instance.stubs(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}, {:ip => '172.16.0.2', :proto => 'http'}])
+    Mollom.any_instance.expects(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}, {:ip => '172.16.0.2', :proto => 'http'}])
     xml_rpc = mock
     xml_rpc.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo')).raises(XMLRPC::FaultException.new(1200, "Redirect"))
     xml_rpc2 = mock
     xml_rpc2.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo'))
     
-    XMLRPC::Client.stubs(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
-    XMLRPC::Client.stubs(:new).with('172.16.0.2', '/1.0').returns(xml_rpc2)
+    XMLRPC::Client.expects(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
+    XMLRPC::Client.expects(:new).with('172.16.0.2', '/1.0').returns(xml_rpc2)
     @mollom.send_command('mollom.testMessage', {:options => 'foo'})
   end
   
   def test_send_command_with_reload_exception
-    # TODO: Test this
-    # @mollom.send_command('mollom.testMessage', {:options => 'foo'})
+    Mollom.any_instance.stubs(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}], [{:ip => '172.16.0.2', :proto => 'http'}])
+    xml_rpc = mock
+    xml_rpc.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo')).raises(XMLRPC::FaultException.new(1100, "Refresh"))
+    xml_rpc2 = mock
+    xml_rpc2.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo'))
+
+    XMLRPC::Client.expects(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
+    XMLRPC::Client.expects(:new).with('172.16.0.2', '/1.0').returns(xml_rpc2)
+    @mollom.send_command('mollom.testMessage', {:options => 'foo'})
   end
   
   def test_send_command_with_bad_command
-    Mollom.any_instance.stubs(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}])
+    Mollom.any_instance.expects(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}])
     xml_rpc = mock
     xml_rpc.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo')).raises(XMLRPC::FaultException.new(1000, "Fault String"))
-    XMLRPC::Client.stubs(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
+    XMLRPC::Client.expects(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
     
     assert_raise(Mollom::Error) { @mollom.send_command('mollom.testMessage', {:options => 'foo'}) }
   end
   
   def test_send_command_with_bad_server_and_no_more_available
-    Mollom.any_instance.stubs(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}])
+    Mollom.any_instance.expects(:server_list).returns([{:ip => '172.16.0.1', :proto => 'http'}])
     xml_rpc = mock
     xml_rpc.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo')).raises(XMLRPC::FaultException.new(1200, "Redirect"))
     
-    XMLRPC::Client.stubs(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
+    XMLRPC::Client.expects(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
     
     assert_raise(Mollom::NoAvailableServers) { @mollom.send_command('mollom.testMessage', {:options => 'foo'}) }
   end

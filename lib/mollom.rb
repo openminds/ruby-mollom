@@ -10,7 +10,7 @@ class Mollom
   module Errors
     Standard = 1000
     Refresh = 1100
-    Redirect = 1200
+    TooBusy = 1200
   end
 
   attr_accessor :private_key, :public_key
@@ -140,10 +140,10 @@ class Mollom
         case error.faultCode
         when Errors::Standard
           raise Error.new(error.faultString)
-        when Errors::Refresh
+        when Errors::Refresh # Refresh server list please!
           # we take this one out of our loop
           raise
-        when Errors::Redirect
+        when Errors::TooBusy # Server is too busy, take the next one
           next
         else
           next
