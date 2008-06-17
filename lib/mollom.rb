@@ -85,6 +85,8 @@ class Mollom
   # Standard check to see if your public/private keypair are recognized. Takes no options
   def key_ok?
     return send_command('mollom.verifyKey')
+  rescue XMLRPC::FaultException
+    return false
   end
 
   # Gets some statistics from Mollom about your site.

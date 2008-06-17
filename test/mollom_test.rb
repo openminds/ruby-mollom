@@ -129,7 +129,12 @@ class TestMollom < Test::Unit::TestCase
 
   def test_key_ok
     Mollom.any_instance.expects(:send_command).with('mollom.verifyKey').returns(true)
-    @mollom.key_ok?
+    assert @mollom.key_ok?
+  end
+  
+  def test_invalid_key
+    Mollom.any_instance.expects(:send_command).with('mollom.verifyKey').raises(XMLRPC::FaultException.new(1000, "Internal server error due to malformed request, or the hamster powering the server died..."))
+    assert !@mollom.key_ok?
   end
   
   def test_statistics
