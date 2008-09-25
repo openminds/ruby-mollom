@@ -18,7 +18,6 @@ class Mollom
   end
 
   attr_accessor :private_key, :public_key
-  attr_writer :server_list
 
   # Creates a new Mollom object. Takes +private_key+ and +public_key+ as keys.
   # 
@@ -136,6 +135,13 @@ class Mollom
     end
     # Should have returned a server_list here..
     raise(Error.new("Can't get mollom server-list"))
+  end
+  
+  def server_list=(list)
+    # Check if we get an actual serverlist-array
+    if list.is_a?(Array) && list.all? {|hash| hash.has_key?(:host) && hash.has_key?(:proto) } 
+      @server_list = list
+    end
   end
 
   private

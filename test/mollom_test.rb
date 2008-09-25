@@ -73,6 +73,22 @@ class TestMollom < Test::Unit::TestCase
     @mollom.server_list(true)
   end
   
+  def test_server_list_setter_with_good_list
+    @mollom.server_list = [{:host => '172.16.0.1', :proto => 'http'}, {:host => '172.16.0.2', :proto => 'http'}]
+    assert_equal [{:host => '172.16.0.1', :proto => 'http'}, {:host => '172.16.0.2', :proto => 'http'}], @mollom.instance_variable_get('@server_list')
+  end
+  
+  def test_send_command_with_old_server_list
+    @mollom.server_list = [{:ip => '172.16.0.1', :proto => 'http'}, {:ip => '172.16.0.2', :proto => 'http'}]
+    assert_equal nil, @mollom.instance_variable_get('@server_list')
+  end
+
+  def test_send_command_with_bad_server_list
+    @mollom.server_list = "404 Not Found Bad User Input"
+    assert_equal nil, @mollom.instance_variable_get('@server_list')
+  end
+
+  
   def test_send_command_with_good_server
     Mollom.any_instance.expects(:server_list).returns([{:host => '172.16.0.1', :proto => 'http'}])
     xml_rpc = mock
