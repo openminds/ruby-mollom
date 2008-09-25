@@ -137,6 +137,9 @@ class Mollom
     raise(Error.new("Can't get mollom server-list"))
   end
   
+  # Sets the server list used to contact Mollom. This should be used to set the list of cached servers.
+  #
+  # If you try to set a faulty server list, the function will silently fail, so we can get the server-list from Mollom.
   def server_list=(list)
     # Check if we get an actual serverlist-array
     if list.is_a?(Array) && list.all? {|hash| hash.has_key?(:host) && hash.has_key?(:proto) } 
