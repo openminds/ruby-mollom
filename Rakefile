@@ -10,7 +10,7 @@ Gem::manage_gems
 spec = Gem::Specification.new do |s|
     s.platform  =   Gem::Platform::RUBY
     s.name      =   "mollom"
-    s.version   =   "0.1.3"
+    s.version   =   "0.1.4"
     s.rubyforge_project = "mollom"
     s.author    =   "Jan De Poorter"
     s.email     =   "mollom@openminds.be"
