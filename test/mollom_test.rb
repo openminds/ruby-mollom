@@ -64,7 +64,14 @@ class TestMollom < Test::Unit::TestCase
     XMLRPC::Client.stubs(:new).with('xmlrpc.mollom.com', '/1.0').returns(xml_rpc)
     assert_equal(nil, @mollom.send(:get_server_list_from, {:host => 'xmlrpc.mollom.com', :proto => 'http'}))
   end
-  
+
+  def test_get_server_list_from_with_timemout
+    xml_rpc = mock
+    xml_rpc.expects(:call).times(1).with('mollom.getServerList', is_a(Hash)).raises(Timeout::Error)
+    XMLRPC::Client.stubs(:new).with('xmlrpc.mollom.com', '/1.0').returns(xml_rpc)
+    assert_equal(nil, @mollom.send(:get_server_list_from, {:host => 'xmlrpc.mollom.com', :proto => 'http'}))
+  end
+
   def test_server_list_force_reload
     Mollom.any_instance.expects(:get_server_list_from).times(2).with(:host => 'xmlrpc3.mollom.com', :proto => 'http').returns([{:host => '172.16.0.1', :proto => 'http'}, {:host => '172.16.0.2', :proto => 'http'}, {:host => '172.16.0.2', :proto => 'https'}])
     

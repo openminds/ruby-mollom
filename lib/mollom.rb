@@ -153,7 +153,7 @@ class Mollom
         proto, ip = server.split('://')
         {:proto => proto, :host => ip}
     end
-  rescue
+  rescue StandardError, Exception
     nil
   end
   
