@@ -150,46 +150,78 @@ class TestMollom < Test::Unit::TestCase
   end
   
   def test_check_content
-    Mollom.any_instance.expects(:send_command).with('mollom.checkContent', :author_ip => '172.16.0.1', :post_body => 'Lorem Ipsum').returns("spam" => 1, "quality" => 0.40, "session_id" => 1)
-    cr = @mollom.check_content(:author_ip => '172.16.0.1', :post_body => 'Lorem Ipsum')
-    assert cr.ham?
-    assert_equal 1, cr.session_id
-    assert_equal 0.40, cr.quality
+    options = {:author_ip => '172.16.0.1', :post_body => 'Lorem Ipsum'}
+    
+    assert_command 'mollom.checkContent', :with => options, :returns => {"spam" => 1, "quality" => 0.40, "session_id" => 1} do
+      cr = @mollom.check_content(optionsq)
+      assert cr.ham?
+      assert_equal 1, cr.session_id
+      assert_equal 0.40, cr.quality
+    end
   end
   
   def test_image_captcha
-    Mollom.any_instance.expects(:send_command).with('mollom.getImageCaptcha', :author_ip => '172.16.0.1').returns('url' => 'http://xmlrpc1.mollom.com:80/a9616e6b4cd6a81ecdd509fa624d895d.png', 'session_id' => 'a9616e6b4cd6a81ecdd509fa624d895d')
-    @mollom.image_captcha(:author_ip => '172.16.0.1')
+    options = {:author_ip => '172.16.0.1'}
+    
+    assert_command 'mollom.getImageCaptcha', :with => options, :returns => {'url' => 'http://xmlrpc1.mollom.com:80/a9616e6b4cd6a81ecdd509fa624d895d.png', 'session_id' => 'a9616e6b4cd6a81ecdd509fa624d895d'} do
+      @mollom.image_captcha(:author_ip => '172.16.0.1')
+    end
   end
   
   def test_audio_captcha
-    Mollom.any_instance.expects(:send_command).with('mollom.getAudioCaptcha', :author_ip => '172.16.0.1').returns('url' => 'http://xmlrpc1.mollom.com:80/a9616e6b4cd6a81ecdd509fa624d895d.mp3', 'session_id' => 'a9616e6b4cd6a81ecdd509fa624d895d')
-    @mollom.audio_captcha(:author_ip => '172.16.0.1')
+    options = {:author_ip => '172.16.0.1'}
+    
+    assert_command 'mollom.getAudioCaptcha', :with => options, :returns => {'url' => 'http://xmlrpc1.mollom.com:80/a9616e6b4cd6a81ecdd509fa624d895d.mp3', 'session_id' => 'a9616e6b4cd6a81ecdd509fa624d895d'} do
+      @mollom.audio_captcha(options)
+    end
   end
   
   def test_valid_captcha
-    Mollom.any_instance.expects(:send_command).with('mollom.checkCaptcha', :session_id => 'a9616e6b4cd6a81ecdd509fa624d895d', :solution => 'foo').returns(true)
-    @mollom.valid_captcha?(:session_id => 'a9616e6b4cd6a81ecdd509fa624d895d', :solution => 'foo')
+    options = {:session_id => 'a9616e6b4cd6a81ecdd509fa624d895d', :solution => 'foo'}
+    
+    assert_command 'mollom.checkCaptcha', :with => options, :returns => true do
+      assert @mollom.valid_captcha?(options)
+    end
   end
 
   def test_key_ok
-    Mollom.any_instance.expects(:send_command).with('mollom.verifyKey').returns(true)
-    assert @mollom.key_ok?
+    assert_command 'mollom.verifyKey', :returns => true do
+      assert @mollom.key_ok?
+    end
   end
   
   def test_invalid_key
-    Mollom.any_instance.expects(:send_command).with('mollom.verifyKey').raises(XMLRPC::FaultException.new(1000, "Internal server error due to malformed request, or the hamster powering the server died..."))
-    assert !@mollom.key_ok?
+    assert_command 'mollom.verifyKey', :raises => internal_server_error do
+      assert !@mollom.key_ok?
+    end
   end
   
   def test_statistics
-    Mollom.any_instance.expects(:send_command).with('mollom.getStatistics', :type => 'total_accepted').returns(123)
-    @mollom.statistics(:type => 'total_accepted')
+    assert_command 'mollom.getStatistics', :with => {:type => 'total_accepted'}, :returns => 12 do
+      @mollom.statistics(:type => 'total_accepted')
+    end
   end
   
   def test_send_feedback
-    Mollom.any_instance.expects(:send_command).with('mollom.sendFeedback', :session_id => 1, :feedback => 'profanity')
-    @mollom.send_feedback :session_id => 1, :feedback => 'profanity'
+    assert_command 'mollom.sendFeedback', :with => {:session_id => 1, :feedback => 'profanity'} do
+      @mollom.send_feedback :session_id => 1, :feedback => 'profanity'
+    end
   end
+  
+  private
+  def assert_command command, options = {}
+    expectation = Mollom.any_instance.expects(:send_command)
+    expectation.with do |*arguments|
+      arguments.first == command &&
+      (!options[:with] || options[:with] == arguments.last)
+    end
+    expectation.returns(options[:returns]) if options[:returns]
+    expectation.raises(options[:raises]) if options[:raises]
     
+    yield
+  end
+  
+  def internal_server_error
+    XMLRPC::FaultException.new(1000, "Internal server error due to malformed request, or the hamster powering the server died...")
+  end
 end
