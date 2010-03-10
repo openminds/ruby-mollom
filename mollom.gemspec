@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
      "MIT-LICENSE",
      "README.rdoc",
      "Rakefile",
+     "VERSION",
      "lib/mollom.rb",
      "lib/mollom/api_compatibility.rb",
      "lib/mollom/content_response.rb",
