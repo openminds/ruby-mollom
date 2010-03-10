@@ -120,6 +120,13 @@ class Mollom
   def send_feedback feedback = {}
     return send_command('mollom.sendFeedback', feedback)
   end
+  
+  # Gets language of input text.
+  #
+  # mollom.language_for 'This is my text'
+  def language_for text
+    send_command('mollom.detectLanguage', :text => text)
+  end
 
   # Gets a list of servers from Mollom. You should cache this information in your application in a temporary file or in a database. You can set this with Mollom#server_list=
   # 

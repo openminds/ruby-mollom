@@ -153,7 +153,7 @@ class TestMollom < Test::Unit::TestCase
     options = {:author_ip => '172.16.0.1', :post_body => 'Lorem Ipsum'}
     
     assert_command 'mollom.checkContent', :with => options, :returns => {"spam" => 1, "quality" => 0.40, "session_id" => 1} do
-      cr = @mollom.check_content(optionsq)
+      cr = @mollom.check_content(options)
       assert cr.ham?
       assert_equal 1, cr.session_id
       assert_equal 0.40, cr.quality
@@ -205,6 +205,12 @@ class TestMollom < Test::Unit::TestCase
   def test_send_feedback
     assert_command 'mollom.sendFeedback', :with => {:session_id => 1, :feedback => 'profanity'} do
       @mollom.send_feedback :session_id => 1, :feedback => 'profanity'
+    end
+  end
+  
+  def test_detect_language
+    assert_command 'mollom.detectLanguage', :with => {:text => 'Dit is nederlands'}, :returns => [{"confidence"=>0.332, "language"=>"nl"}] do
+      assert_equal [{"confidence"=>0.332, "language"=>"nl"}], @mollom.language_for('Dit is nederlands')
     end
   end
   
