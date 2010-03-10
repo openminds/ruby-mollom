@@ -2,6 +2,7 @@ require 'xmlrpc/client'
 require 'openssl'
 require 'base64'
 require 'mollom/content_response'
+require 'mollom/api_compatibility'
 
 # Mollom API requires this to change, but this gives a warning!
 # XMLRPC::Client::USER_AGENT = "Ruby Mollom/0.1"
@@ -206,4 +207,6 @@ class Mollom
 
   class Error < StandardError; end
   class NoAvailableServers < Error; end
+  
+  include ApiCompatibility
 end

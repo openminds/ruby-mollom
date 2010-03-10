@@ -214,6 +214,17 @@ class TestMollom < Test::Unit::TestCase
     end
   end
   
+  def test_api_compatability
+    assert @mollom.respond_to? :checkContent
+    assert @mollom.respond_to? :getImageCaptcha
+    assert @mollom.respond_to? :getAudioCaptcha
+    assert @mollom.respond_to? :checkCaptcha
+    assert @mollom.respond_to? :verifyKey
+    assert @mollom.respond_to? :getStatistics
+    assert @mollom.respond_to? :sendFeedback 
+    assert @mollom.respond_to? :detectLanguage
+  end
+  
   private
   def assert_command command, options = {}
     expectation = Mollom.any_instance.expects(:send_command)
