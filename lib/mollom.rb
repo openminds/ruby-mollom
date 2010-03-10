@@ -52,7 +52,7 @@ class Mollom
   #  response.spam? # => false
   #  response.ham?  # => true
   def check_content content = {}
-    return ContentResponse.new(send_command('mollom.checkContent', content))
+    ContentResponse.new(send_command('mollom.checkContent', content))
   end
 
   # Requests an Image captcha from Mollom. It takes the optional <tt>session_id</tt> and <tt>author_ip</tt> keys, if you allready have a session.
@@ -62,7 +62,7 @@ class Mollom
   #  captcha['url']        # => http://xmlrpc1.mollom.com:80/a9616e6b4cd6a81ecdd509fa624d895d.png
   #  captcha['session_id'] # => a9616e6b4cd6a81ecdd509fa624d895d
   def image_captcha info = {}
-    return send_command('mollom.getImageCaptcha', info)
+    send_command('mollom.getImageCaptcha', info)
   end
 
   # Requests an Audio captcha from Mollom. It takes the optional +session_id+ and +author_ip+ keys, if you allready have a session.
@@ -72,7 +72,7 @@ class Mollom
   #  captcha['url']        # => http://xmlrpc1.mollom.com:80/a9616e6b4cd6a81ecdd509fa624d895d.mp3
   #  captcha['session_id'] # => a9616e6b4cd6a81ecdd509fa624d895d
   def audio_captcha info = {}
-    return send_command('mollom.getAudioCaptcha', info)
+    send_command('mollom.getAudioCaptcha', info)
   end
 
   # Checks with mollom if the given captcha (by the user) is correct. Takes +session_id+ and +solution+ keys. Both keys are required.
@@ -83,14 +83,14 @@ class Mollom
   #  return = mollom.valid_captcha? :session_id => captcha['session_id'], :solution => 'abcDe9'
   #  return # => true
   def valid_captcha? info = {}
-    return send_command('mollom.checkCaptcha', info)
+    send_command('mollom.checkCaptcha', info)
   end
 
   # Standard check to see if your public/private keypair are recognized. Takes no options
   def key_ok?
-    return send_command('mollom.verifyKey')
+    send_command('mollom.verifyKey')
   rescue XMLRPC::FaultException
-    return false
+    false
   end
 
   # Gets some statistics from Mollom about your site.
@@ -106,7 +106,7 @@ class Mollom
   #
   #  mollom.statistics :type => 'total_accepted' # => 123
   def statistics options = {}
-    return send_command('mollom.getStatistics', options)
+    send_command('mollom.getStatistics', options)
   end
 
   # Send feedback to Mollom about a certain content. Required keys are +session_id+ and +feedback+. 
@@ -119,7 +119,7 @@ class Mollom
   #
   #  mollom.send_feedback :session_id => 'a9616e6b4cd6a81ecdd509fa624d895d', :feedback => 'unwanted'
   def send_feedback feedback = {}
-    return send_command('mollom.sendFeedback', feedback)
+    send_command('mollom.sendFeedback', feedback)
   end
   
   # Gets language of input text.
@@ -168,7 +168,8 @@ class Mollom
   def send_command(command, data = {})
     server_list.each do |server|
       begin
-        return XMLRPC::Client.new(server[:host], "/#{API_VERSION}").call(command, data.merge(authentication_hash))
+        client = XMLRPC::Client.new(server[:host], "/#{API_VERSION}")
+        return client.call(command, data.merge(authentication_hash))
       # TODO: Rescue more stuff (Connection Timeout and such)
       rescue XMLRPC::FaultException => error
         case error.faultCode
