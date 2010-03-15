@@ -4,8 +4,8 @@ class Mollom
 
     Unknown = 0
     Ham  = 1
-    Unsure = 2
-    Spam = 3
+    Spam = 2
+    Unsure = 3
 
     # This class should only be initialized from within the +check_content+ command.
     def initialize(hash)

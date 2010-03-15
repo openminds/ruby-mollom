@@ -4,7 +4,7 @@ require "mollom"
 
 class TestContentResponse < Test::Unit::TestCase
   def test_spam
-    cr = Mollom::ContentResponse.new('spam' => 3, 'session_id' => '1', 'quality' => '10')
+    cr = Mollom::ContentResponse.new('spam' => 2, 'session_id' => '1', 'quality' => '10')
     assert cr.spam?
     assert !cr.ham?
     assert_equal 'spam', cr.to_s
@@ -25,7 +25,7 @@ class TestContentResponse < Test::Unit::TestCase
   end
   
   def test_unsure
-    cr = Mollom::ContentResponse.new('spam' => 2, 'session_id' => '1', 'quality' => '10')
+    cr = Mollom::ContentResponse.new('spam' => 3, 'session_id' => '1', 'quality' => '10')
     assert cr.unsure?
     assert !cr.unknown?
     assert_equal 'unsure', cr.to_s
