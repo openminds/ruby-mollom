@@ -172,6 +172,8 @@ class Mollom
         client = XMLRPC::Client.new(server[:host], "/#{API_VERSION}")
         return client.call(command, data.merge(authentication_hash))
       # TODO: Rescue more stuff (Connection Timeout and such)
+      rescue RuntimeError
+        next
       rescue XMLRPC::FaultException => error
         case error.faultCode
         when Errors::Standard

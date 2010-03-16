@@ -106,6 +106,18 @@ class TestMollom < Test::Unit::TestCase
   end
   
   
+  def test_send_command_with_bad_http_response
+    Mollom.any_instance.expects(:server_list).returns([{:host => '172.16.0.1', :proto => 'http'}, {:host => '172.16.0.2', :proto => 'http'}])
+    xml_rpc = mock
+    xml_rpc.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo')).raises(RuntimeError.new('HTTP-Error: 302 Found'))
+    xml_rpc2 = mock
+    xml_rpc2.expects(:call).with('mollom.testMessage', has_entry(:options => 'foo'))
+    
+    XMLRPC::Client.expects(:new).with('172.16.0.1', '/1.0').returns(xml_rpc)
+    XMLRPC::Client.expects(:new).with('172.16.0.2', '/1.0').returns(xml_rpc2)
+    @mollom.send_command('mollom.testMessage', {:options => 'foo'})
+  end
+  
   def test_send_command_with_bad_server
     Mollom.any_instance.expects(:server_list).returns([{:host => '172.16.0.1', :proto => 'http'}, {:host => '172.16.0.2', :proto => 'http'}])
     xml_rpc = mock
