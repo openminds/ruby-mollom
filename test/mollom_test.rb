@@ -77,6 +77,7 @@ class TestMollom < Test::Unit::TestCase
     
     @mollom.server_list
     @mollom.server_list
+    @mollom.server_list
     @mollom.server_list(true)
   end
   
