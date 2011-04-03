@@ -1,6 +1,6 @@
 class Mollom
   class ContentResponse
-    attr_reader :session_id, :quality
+    attr_reader :session_id, :quality, :profanity, :sentiment
 
     Unknown = 0
     Ham  = 1
@@ -9,11 +9,14 @@ class Mollom
 
     # This class should only be initialized from within the +check_content+ command.
     def initialize(hash)
+      @hash = hash
       @spam_response = hash["spam"]
       @session_id = hash["session_id"]
       @quality = hash["quality"]
+      @profanity = hash["profanity"]
+      @sentiment = hash["sentiment"]
     end
-
+    
     # Is the content Spam?
     def spam?
       @spam_response == Spam
@@ -42,6 +45,10 @@ class Mollom
       when Unsure 	then 'unsure'
       when Spam 	then 'spam'
       end
+    end
+    
+    def to_hash
+      @hash
     end
   end
 end
