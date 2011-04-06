@@ -42,6 +42,7 @@ class Mollom
   #  author_ip      # => The author's IP address
   #  author_openid  # => The author's OpenID
   #  author_id      # => The author's ID
+  #  checks         # => A comma-separated list of checks. Available checks include 'spam', 'quality', 'profanity', 'sentiment' and 'language'. E.g. 'spam,quality,sentiment'
   #
   # Only the +post_body+ key is required, all other keys are optional.
   # This function returns a ContentResponse object.

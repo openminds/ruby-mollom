@@ -1,6 +1,18 @@
 class Mollom
   class ContentResponse
-    attr_reader :session_id, :quality, :profanity, :sentiment
+    attr_reader :session_id
+    
+    # An assessment of the content's quality, between 0 and 1; 0 being very low, 1 being high quality if specified in check_content checks
+    attr_reader :quality
+    
+    # An assessment of the content's profanity level, between 0 and 1; 0 being non-profane, 1 being very profane if specified in check_content checks
+    attr_reader :profanity
+    
+    # An assessment of the content's sentiment, between 0 and 1; 0 being a very negative sentiment, 1 being a very positive sentiment if specified in check_content checks
+    attr_reader :sentiment
+    
+    # a list of structs containing pairs of language and confidence values if specified in checkContent checks
+    attr_reader :language
 
     Unknown = 0
     Ham  = 1
@@ -15,6 +27,7 @@ class Mollom
       @quality = hash["quality"]
       @profanity = hash["profanity"]
       @sentiment = hash["sentiment"]
+      @language = hash["language"]
     end
     
     # Is the content Spam?
@@ -47,6 +60,7 @@ class Mollom
       end
     end
     
+    # Returns the original hash for testing
     def to_hash
       @hash
     end
