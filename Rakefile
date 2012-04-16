@@ -5,7 +5,7 @@ require 'rake/testtask'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "mollom"
+    gemspec.name = "bradleypriest-mollom"
     gemspec.summary = "Ruby class for easy interfacing with the mollom.com open API for spam detection and content quality assesment."
     gemspec.description = "Ruby class for easy interfacing with the mollom.com open API for spam detection and content quality assesment."
     gemspec.email = "mollom@openminds.be"

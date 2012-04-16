@@ -171,6 +171,20 @@ class TestMollom < Test::Unit::TestCase
       assert_equal 1, cr.session_id
       assert_equal 0.40, cr.quality
     end
+  end  
+  
+  def test_check_content_with_checks
+    options = {:author_ip => '172.16.0.1', :post_body => 'Lorem Ipsum', :checks => 'spam,quality,sentiment'}
+    
+    assert_command 'mollom.checkContent', :with => options, :returns => {"spam" => 1, "quality" => 0.40, "session_id" => 1, "sentiment" => 0.25, 'profanity' => 0.10 } do
+      cr = @mollom.check_content(options)
+      assert cr.ham?
+      assert_equal 1, cr.session_id
+      assert_equal 0.40, cr.quality
+      assert_equal 0.25, cr.sentiment
+      assert_equal 0.10, cr.profanity
+      assert cr.respond_to? :to_hash
+    end
   end
   
   def test_image_captcha

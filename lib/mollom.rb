@@ -42,6 +42,7 @@ class Mollom
   #  author_ip      # => The author's IP address
   #  author_openid  # => The author's OpenID
   #  author_id      # => The author's ID
+  #  checks         # => A comma-separated list of checks. Available checks include 'spam', 'quality', 'profanity', 'sentiment' and 'language'. E.g. 'spam,quality,sentiment'
   #
   # Only the +post_body+ key is required, all other keys are optional.
   # This function returns a ContentResponse object.
@@ -167,12 +168,14 @@ class Mollom
   end
   
   def send_command(command, data = {})
+    last_error = nil
     server_list.each do |server|
       begin
         client = XMLRPC::Client.new(server[:host], "/#{API_VERSION}")
         return client.call(command, data.merge(authentication_hash))
       # TODO: Rescue more stuff (Connection Timeout and such)
-      rescue RuntimeError
+      rescue RuntimeError => e
+        last_error = e
         next
       rescue XMLRPC::FaultException => error
         case error.faultCode
@@ -184,11 +187,12 @@ class Mollom
         when Errors::TooBusy # Server is too busy, take the next one
           next
         else
+          last_error = error
           next
         end
       end
     end
-    raise Mollom::NoAvailableServers
+    raise last_error || Mollom::NoAvailableServers
   rescue XMLRPC::FaultException
     # We know it is Errors::Refresh
     server_list(true)
